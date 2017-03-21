@@ -5,6 +5,7 @@ function preload () {
   game.load.image('sky', 'assets/sky.png')
   game.load.image('ground', 'assets/platform.png')
   game.load.image('star', 'assets/star.png')
+  game.load.image('diamond', 'assets/diamond.png')
   game.load.spritesheet('dude', 'assets/dude.png', 32, 48)
 }
 
@@ -27,6 +28,7 @@ function create () {
   createPlatforms()
   createPlayer()
   createStars()
+  createDiamond()
 
   scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' })
 }
@@ -38,6 +40,7 @@ function update () {
 
   //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
   game.physics.arcade.overlap(player, stars, collectStar, null, this)
+  game.physics.arcade.overlap(player, diamonds, collectDiamond, null, this)
 
   movePlayer(player)
 
@@ -72,6 +75,15 @@ function collectStar (player, star) {
 
   //  Add and update the score
   score += 10
+  scoreText.text = 'Score: ' + score
+}
+
+function collectDiamond (player, diamond) {
+  // Removes the star from the screen
+  diamond.kill()
+
+  //  Add and update the score
+  score -= 90
   scoreText.text = 'Score: ' + score
 }
 
@@ -141,4 +153,11 @@ function createStars () {
     star.body.bounce.y = 0.7 + Math.random() * 0.2
     star.body.bounce.x = 0.7 + Math.random() * 0.2
   }
+}
+
+function createDiamond () {
+  diamonds = game.add.group()
+  diamonds.enableBody = true
+
+  var diamond = diamonds.create(207, 50, 'diamond')
 }
