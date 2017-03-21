@@ -58,12 +58,47 @@ function create () {
   //  Our two animations, walking left and right.
   player.animations.add('left', [0, 1, 2, 3], 10, true)
   player.animations.add('right', [5, 6, 7, 8], 10, true)
+
+/**
+* Create the stars that will be collected by the player.
+*/
+  stars = game.add.group()
+
+  stars.enableBody = true
+
+  //  Here we'll create 12 of them evenly spaced apart
+  for (var i = 0; i < 12; i++) {
+    //  Create a star inside of the 'stars' group
+    var star = stars.create(i * 70, 0, 'star')
+
+    //  Let gravity do its thing
+    star.body.gravity.y = 20
+    star.body.collideWorldBounds = true
+
+    //  This just gives each star a slightly random bounce value
+    star.body.bounce.y = 0.7 + Math.random() * 0.2
+    star.body.bounce.x = 18 + Math.random() * 0.2
+  }
 }
 
 function update () {
   //  Collide the player and the stars with the platforms
-  var hitPlatform = game.physics.arcade.collide(player, platforms)
+  game.physics.arcade.collide(player, platforms)
+  game.physics.arcade.collide(stars, platforms, starBounce, null, this)
 
+  //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+  game.physics.arcade.overlap(player, stars, collectStar, null, this)
+  starCollideWorldBounce(stars)
+
+  movePlayer(player)
+
+  //  Allow the player to jump if they are touching the ground.
+  if (cursors.up.isDown && player.body.touching.down) {
+    player.body.velocity.y = -350
+  }
+}
+
+function movePlayer (player) {
   //  Reset the players velocity (movement)
   player.body.velocity.x = 0
   /* global cursors */
@@ -80,9 +115,21 @@ function update () {
     player.animations.stop()
     player.frame = 4
   }
+}
 
-  //  Allow the player to jump if they are touching the ground.
-  if (cursors.up.isDown && player.body.touching.down && hitPlatform) {
-    player.body.velocity.y = -350
+function collectStar (player, star) {
+  // Removes the star from the screen
+  star.kill()
+}
+
+function starBounce (star) {
+  star.body.gravity.x = (Math.random() - 0.5) * 1.5
+}
+
+function starCollideWorldBounce (stars) {
+  for(star in stars) {
+    if (star.x === game.world.x || star.x === 0) {
+      star.body.gravity.x = -star.body.gravity.x
+    }
   }
 }
